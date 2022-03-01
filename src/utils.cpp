@@ -5,7 +5,17 @@
 int squareToIndex(Level level,
 File file, Rank rank)
 {
-     return ((int)level+2)*81+((int)rank+2)*9+(int)file+2;
+    return ((int)level+2)*81+((int)rank+2)*9+(int)file+2;
+}
+int ninesToFives(int index)
+{
+	int file=0;
+	int rank=0;
+	int level=0;
+	level=(int)(index/81)-2;
+	rank=(int)((index/9)%9)-2;
+	file=(int)(index%9)-2;
+	return level*25+rank*5+file;
 }
 
 Piece bitsetToPiece(std::bitset<SIZE> set)

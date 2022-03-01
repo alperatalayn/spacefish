@@ -7,6 +7,9 @@
 //first characters: W for White B for black
 enum Piece {NONE,WP,WN,WB,WR,WU,WQ,WK,BP
 ,BN,BB,BR,BU,BQ,BK,FULL};
+//Piece values for evaluation
+enum class Value {WP=1,WN=4,WB=3,WR=5,WU=3,WQ=10,WK=900,BP=-1
+,BN=-4,BB=-3,BR=-5,BU=-3,BQ=-10,BK=-900,MATE=1000};
 
 //Coordinates
 enum class File {A,B,C,D,E};
@@ -25,5 +28,6 @@ enum NMove {LUU=-163,RUU=-161,FUU=-171,BUU=-153,
 enum Color {BLACK,WHITE};
 //Conversion between coordinates and indexes
 int squareToIndex(Level, File, Rank);
+int ninesToFives(int);
 Piece bitsetToPiece(std::bitset<SIZE>);
 #endif

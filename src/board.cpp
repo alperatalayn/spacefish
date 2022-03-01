@@ -4,16 +4,20 @@
 #include <vector>
 #include "board.h"
 #include "move.h"
+#include "utils.h"
 
 std::vector<std::bitset<SIZE>> Board::getBoard()
 {
 	return boardArr;
 }
-
+bool Board::getTurn()
+{
+	return turn;
+}
 void Board::initialize()
 {
 	parseFEN(START_POS);
-	std::cout<<"board initialized!"<<std::endl;	
+	turn = Color::WHITE;
 }
 
 Board::Board()
@@ -23,9 +27,7 @@ Board::Board()
 	for(int i=0;i<729;i++)
 	{
 		boardArr.push_back(temp);
-		std::cout<<"great success"<<std::endl;
 	}
-	std::cout<<"board created succesfuly!"<<std::endl;;
 }
 
 Piece Board::getPieceByIndex(int index)
@@ -108,77 +110,17 @@ void Board::parseFEN(std::string FEN)
 			}
 			counter++;
 		}
-	}
-}
-std::string Board::createFEN(std::vector<std::bitset<SIZE>> boardArr)
-{
-	std::string FENString="";
-	int spaceCounter=0;
-	for(int i=0;i<729;i++)
-	{	
-		Piece currentPiece=bitsetToPiece(boardArr[i]);
-		if(currentPiece!=Piece::NONE&&spaceCounter!=0)
+		else if(ch == '-')
 		{
-			FENString+=std::to_string(spaceCounter);
-			spaceCounter=0;
-		}
-		if(i%9==2 &&currentPiece!=Piece::FULL
-		&&!FENString.empty())
-		{
-			FENString+='/';
-		}
-		switch(currentPiece)
-		{
-			case Piece::NONE:
-				spaceCounter+=1;
-				break;
-			case Piece::WP:
-				FENString+='P';
-				break;
-			case Piece::WB:
-				FENString+='B';
-				break;
-			case Piece::WR:
-				FENString+='R';
-				break;
-			case Piece::WU:
-				FENString+='U';
-				break;
-			case Piece::WN:
-				FENString+='N';
-				break;
-			case Piece::WQ:
-				FENString+='Q';
-				break;
-			case Piece::WK:
-				FENString+='K';
-				break;
-			case Piece::BP:
-				FENString+='p';
-				break;
-			case Piece::BN:
-				FENString+='n';
-				break;
-			case Piece::BB:
-				FENString+='b';
-				break;
-			case Piece::BU:
-				FENString+='u';
-				break;
-			case Piece::BR:
-				FENString+='r';
-				break;
-			case Piece::BQ:
-				FENString+='q';
-				break;
-			case Piece::BK:
-				FENString+='k';
-				break;
-			case Piece::FULL:
-				break;
+			if(FEN[i+1] == 'w')
+			{
+				turn=Color::WHITE;
+				return;
+			}
+			turn=Color::BLACK;
+			return;
 		}
 	}
-	return FENString;
 }
 std::string Board::createFEN()
 {
@@ -248,6 +190,14 @@ std::string Board::createFEN()
 				break;
 		}
 	}
+	if(turn == Color::WHITE)
+	{
+		FENString += " -w";
+	}
+	else
+	{
+		FENString += " -b";
+	}
 	return FENString;
 }
 
@@ -315,14 +265,17 @@ void Board::printBoard()
 				std::cout<<'*';
 		}	
 	}
-	std::cout<<std::endl;
+	std::cout<<std::endl<<"turn: "<<turn;
 }
-void Board::move(int source,int destination)
-{
+void Board::move(Move m)
+{	
+	int source= m.getSrc();
+	int destination=m.getDest();
 	if(!boardArr[source].none())
 	{
 		boardArr[destination]=boardArr[source];
 		boardArr[source].reset();
+		turn = !turn;
 	}
 	else
 	{
@@ -330,17 +283,3 @@ void Board::move(int source,int destination)
 	}
 }
 
-std::vector<std::bitset<SIZE>> Board::afterMove(std::vector<std::bitset<SIZE>>boardArr,Move move)
-{
-	std::vector<std::bitset<SIZE>> temp = boardArr;
-	if(!temp[move.getSrc()].none())
-	{
-		temp[move.getDest()]=temp[move.getSrc()];
-		temp[move.getSrc()].reset();
-		return temp;
-	}
-	else
-	{
-		std::cout<<"no piece at given square"<<std::endl;
-	}
-}

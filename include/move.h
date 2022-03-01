@@ -6,6 +6,7 @@ class Move
 		int src;
 		int dest;
 	public:
+		int eval;
 		void setSrc(int);
 		void setDest(int);
 		int getSrc();

@@ -8,6 +8,7 @@ class Board
 {
 	private:
 		std::vector<std::bitset<SIZE>> boardArr;
+		bool turn;
 	public:
 		Board();
 		std::vector<std::bitset<SIZE>> getBoard();
@@ -15,12 +16,10 @@ class Board
 		void initialize();
 		void parseFEN(std::string);
 		std::string createFEN();
-		std::string createFEN(std::vector<std::bitset<SIZE>>);
 		void setSquare(int, Piece);
 		void printBoard();
-		void move(int,int);
-		std::vector<std::bitset<SIZE>> afterMove(std::vector<std::bitset<SIZE>>,Move);
-		
+		void move(Move);
+		bool getTurn();
 };
 
 

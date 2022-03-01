@@ -4,7 +4,7 @@
 #include<string>
 #include "generator.h"
 #include "board.h"
-
+#include "utils.h"
 NMove nMoveArr[]={NMove::LUU,NMove::RUU,NMove::FUU,
 	NMove::DFF,NMove::DRR,NMove::DLL,NMove::DBB,
 	NMove::UFF,NMove::URR,NMove::ULL,NMove::UBB,
@@ -13,8 +13,10 @@ NMove nMoveArr[]={NMove::LUU,NMove::RUU,NMove::FUU,
 	NMove::RFF,NMove::RBB,NMove::FLL,NMove::FRR,
 	NMove::BUU};
 
-std::queue<Move> Generator::pLegal(std::vector<std::bitset<SIZE>> boardArr,bool turn)
+std::queue<Move> Generator::pLegal(Board b)
 {
+	std::vector<std::bitset<SIZE>> boardArr = b.getBoard();
+	bool turn = b.getTurn();
 	std::queue<Move> moves;
 	Move temp;
 	Piece currentPiece;
@@ -81,7 +83,8 @@ std::queue<Move> Generator::pLegal(std::vector<std::bitset<SIZE>> boardArr,bool 
 						if(boardArr[j].all())
 						{
 							break;
-						}else if(boardArr[j].none())
+						}
+						else if(boardArr[j].none())
 						{
 							temp.setSrc(i);
 							temp.setDest(j);
@@ -156,6 +159,7 @@ std::queue<Move> Generator::pLegal(std::vector<std::bitset<SIZE>> boardArr,bool 
 						int j=i;
 						j+=dir;
 						if(!boardArr[j].none()
+						&&!boardArr[j].all()
 						&&(boardArr[j][SIZE-1]
 						!=boardArr[i][SIZE-1]))
 						{
@@ -197,6 +201,7 @@ std::queue<Move> Generator::pLegal(std::vector<std::bitset<SIZE>> boardArr,bool 
 						int j=i;
 						j+=dir;
 						if(!boardArr[j].none()
+						&&!boardArr[j].all()
 						&&(boardArr[j][SIZE-1]
 						!=boardArr[i][SIZE-1]))
 						{
@@ -267,19 +272,17 @@ void Generator::printMoves(std::queue<Move> moves)
 	}
 }
 
-bool Generator::isCheck(std::vector<std::bitset<SIZE>> boardArr, bool turn)
+bool Generator::isCheck(Board b)
 {
+	std::vector<std::bitset<SIZE>> boardArr = b.getBoard();
+	bool turn = b.getTurn();
 	bool isCheck = false;
-	std::queue<Move> moves = pLegal(boardArr,turn);
+	std::queue<Move> moves = pLegal(b);
 	while(true)
 	{
 		Move currentMove= moves.front();
 		moves.pop();
 		Piece targetPiece = bitsetToPiece(boardArr[currentMove.getDest()]);
-		if(moves.empty())
-		{
-			break;
-		}
 		if(targetPiece ==Piece::WK && !turn)
 		{	
 			isCheck=true;
@@ -287,29 +290,64 @@ bool Generator::isCheck(std::vector<std::bitset<SIZE>> boardArr, bool turn)
 		{
 			isCheck=true;
 		}
-	}
-	return isCheck;
-}
-
-std::queue<Move> Generator::legal(std::vector<std::bitset<SIZE>> boardArr,bool turn)
-{
-	Board b;
-	std::queue<Move> finalList;
-	std::queue<Move> moves = pLegal(boardArr,turn);
-	while(true)
-	{
-		Move currentMove= moves.front();
-		moves.pop();
 		if(moves.empty())
 		{
 			break;
 		}
-		std::cout<<currentMove.getSrc()<<" "<<currentMove.getDest()<<std::endl;
-		bool flag = isCheck(b.afterMove(boardArr,currentMove),turn);
+	}
+	return isCheck;
+}
+bool Generator::isCheckMate(Board b)
+{
+	bool isCheckMate = false;
+	if(legal(b).empty())
+	{
+		isCheckMate=true;
+	}
+	return isCheckMate;
+}
+
+std::queue<Move> Generator::legal(Board b)
+{
+	std::queue<Move> finalList;
+	std::queue<Move> moves = pLegal(b);
+	while(true)
+	{
+		Move currentMove= moves.front();
+		moves.pop();
+		bool flag = isCheck(afterMove(b,currentMove));
 		if(!flag)
 		{
 			finalList.push(currentMove);
-		}			
+		}
+		if(moves.empty())
+		{
+			break;
+		}
 	}
 	return finalList;
+}
+std::queue<Move> Generator::legalToRootFive(Board b)
+{
+	std::queue<Move> finalList;
+	std::queue<Move> moves = legal(b);
+	while(true)
+	{
+		Move currentMove= moves.front();
+		moves.pop();
+		currentMove.setSrc(ninesToFives(currentMove.getSrc()));
+		currentMove.setDest(ninesToFives(currentMove.getDest()));
+		finalList.push(currentMove);
+		if(moves.empty())
+		{
+			break;
+		}
+	}
+	return finalList;
+}
+
+Board Generator::afterMove(Board b, Move m)
+{
+	b.move(m);
+	return b;
 }

@@ -3,12 +3,14 @@
 #include "board.h"
 #include "utils.h"
 #include "generator.h"
+#include "engine.h"
 
 int main()
 {
 	Board Board1;
 	Board1.initialize();
 	Generator g;
+	Engine e;
 	char command;
 	int src;
 	int dest;
@@ -25,13 +27,16 @@ int main()
 			case 'm':
 				std::cout<<"enter move source and destination as integers"<<std::endl;
 				std::cin>>src>>dest;
-				Board1.move(src,dest);
+				Move m;
+				m.setDest(dest);
+				m.setSrc(src);
+				Board1.move(m);
 				break;
 			case 'f':
 				std::cout<<Board1.createFEN()<<std::endl;
 				break;
 			case 'r':
-				g.printMoves(g.pLegal(Board1.getBoard(),Color::WHITE));
+				g.printMoves(g.pLegal(Board1));
 				break;
 			case 'g':
 				std::cout<<"enter index as integer"<<std::endl;
@@ -47,10 +52,23 @@ int main()
 				(Rank)rank);
 				break;
 			case 'c':
-				std::cout<<g.isCheck(Board1.getBoard(),true);
+				std::cout<<g.isCheck(Board1);
 				break;
 			case 'l':
-				g.printMoves(g.legal(Board1.getBoard(),Color::BLACK));
+				g.printMoves(g.legal(Board1));
+				break;
+			
+			case 'e':
+				int safetyFirst=1000;
+				while(safetyFirst>1)
+				{
+					Move best = e.search(Board1,3,-5000,5000,&g);
+					Board1.move(best);
+					std::cout<<"src: "<<best.getSrc()
+					<<" dest: "<<best.getDest()
+					<<" eval: "<<best.eval<<std::endl;
+					safetyFirst-=1;
+				}
 				break;
 		}
 	}
